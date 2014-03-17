@@ -1,0 +1,69 @@
+!/bin/bash 
+clear
+echo Bem vindo ao programa de reconhecimento de caracteres.
+
+#Seleciona o primeiro diretório
+printf "Selecione a pasta que contem a primeira página do livro (digite o número):\n"
+select DIR1 in */
+do test -n "$DIR1" && break
+    echo "Seleção inválida - selecione um dos números.\n"; done
+
+#Seleciona o segundo diretório
+printf "Selecione a pasta que contem a segunda página do livro (digite o número):\n"
+select DIR2 in */
+do test -n "$DIR2" && break
+    echo "Seleção inválida - selecione um dos números.\n"; done
+
+#Vai pro diretório 1, e faz reconhecimento de caractéres
+let CONTADOR=1
+cd "$DIR1"
+printf "\n"
+echo "Começando reconhecimento de caracteres dos arquivos no diretório:" &&pwd
+printf "\n"
+for i in *
+do
+	tesseract $i $CONTADOR -l por -psm 1
+	let CONTADOR=CONTADOR+2
+done
+mv *.txt ../
+
+#Reset no contador, para alinhar páginas par, começando no 2; Vai pro diretório 2
+let CONTADOR=2
+cd "../$DIR2"
+
+echo "\nComeçando reconhecimento de caracteres dos arquivos no diretório:" &&pwd
+#Vai pro diretório 2, e faz reconhecimento de caractéres
+for i in *
+do
+	tesseract $i $CONTADOR -l por -psm 1
+	let CONTADOR=CONTADOR+2
+done
+mv *.txt ../
+cd "../"
+
+#Remove, com "tr" tab e finais de linha
+echo "\nRemover tabluações e finais de linha ou manter o formato original?" 
+select yn in "Sim" "Não"; do
+    case $yn in
+        Sim ) printf "\nLimpando espaços redundantes e juntando todos os arquivos...\n"
+    for i in *.txt
+    do
+        cat $i | tr -d "\t\n\r" > $i.tmp
+        rm $i
+        mv $i.tmp $i
+        done;
+        break;;
+        Não ) break;;
+    esac
+done
+
+
+#Concatena todos os arquivos .txt, com uma linha de espaçamento entre cada página juntada
+for file in *.txt
+do
+   cat "$file" >> livro.txt
+   echo >> livro.txt
+   echo >> livro.txt
+done
+
+printf "\nO arquivo <livro.txt> foi compilado!\n\n"
