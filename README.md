@@ -1,4 +1,4 @@
-scanner
+OCR Scripts
 =======
 
-Scripts para uso do scanner de baixo custo
+Bash scripts to automate the process of OCR and page-join using tesseract.
